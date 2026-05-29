@@ -1,0 +1,9 @@
+[package]
+name = "enzzyfrenzzy/packet"
+description = "5uphi's Packet - Networking library"
+version = "1.7.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+
+[dependencies]
