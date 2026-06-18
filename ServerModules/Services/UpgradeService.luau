@@ -27,6 +27,73 @@ function UpgradeService.GetAllPlayerUpgrades(player: Player)
 	return upgrades
 end
 
+local function CanApplyUpgrade(player: Player, upgradeId, diceId)
+	if not player then
+		return nil, "PlayerNotFound"
+	end
+
+	local dice = DiceService.GetPlayerState(player)
+
+	if not dice then
+		return false, "DicesDosentExist"
+	end
+	if dice.Dice[diceId].Unlocked ~= true then
+		return false, "DiceIsntUnlocked"
+	end
+	if dice.Dice[diceId].Upgrade.Id ~= upgradeId then
+		return false, "DiceAlreadyHasaDifferentUpgrade"
+	end
+	return true
+end
+
+function UpgradeService.ApplyUpgrades(player: Player, choosenUpgradeData)
+	if not player then
+		return nil
+	end
+	if not choosenUpgradeData then
+		return nil
+	end
+	local upgradeOptions = UpgradeService.GetLastGeneratedUpgrades(player)
+	if upgradeOptions == nil then
+		return nil
+	end
+
+	local upgradeIds = {}
+	local diceUpgrades = {}
+
+	local dices = DiceService.GetPlayerState(player)
+
+	local CanUpgrade, error = CanApplyUpgrade(player, choosenUpgradeData.UpgradeId, choosenUpgradeData.DiceId)
+
+	if CanUpgrade == false then
+		print(error)
+		return nil
+	end
+
+	for i = 1, 3 do
+		table.insert(upgradeIds, upgradeOptions[i].Id)
+	end
+
+	if table.find(upgradeIds, choosenUpgradeData.UpgradeId) == nil then
+		print("Upgrade: " .. choosenUpgradeData.UpgradeId .. " never existed...")
+		choosenUpgradeData.UpgradeId = upgradeOptions[choosenUpgradeData.ButtonIndex].Id
+	end
+
+	if dices.Dice[choosenUpgradeData.DiceId].Upgrade.Id == choosenUpgradeData.UpgradeId then
+		dices.Dice[choosenUpgradeData.DiceId].Upgrade.Level += 1
+	else
+		dices.Dice[choosenUpgradeData.DiceId].Upgrade.Id = choosenUpgradeData.UpgradeId
+		print(dices.Dice[choosenUpgradeData.DiceId].Upgrade.Id)
+		dices.Dice[choosenUpgradeData.DiceId].Upgrade.Level = 1
+	end
+
+	for _, dice in pairs(dices) do
+		table.insert(diceUpgrades, { DiceId = dice.Id, Upgrade = dice.Upgrade })
+	end
+
+	return
+end
+
 function UpgradeService.GenerateUpgrades(player: Player)
 	if not player then
 		return nil
@@ -70,7 +137,11 @@ function UpgradeService.GenerateUpgrades(player: Player)
 		end
 		if canApear then
 			table.insert(ChoosenUpgrades, upgrade)
-			lastUpgradesGenerated[player] = ChoosenUpgrades
+			local upgradeIds = {}
+			for i, value in ChoosenUpgrades do
+				table.insert(upgradeIds, value.Id)
+			end
+			lastUpgradesGenerated[player] = upgradeIds
 		end
 	end
 	print("These are the generated upgrades", ChoosenUpgrades)

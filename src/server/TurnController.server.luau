@@ -128,8 +128,8 @@ ResolveTurnRemote.OnServerInvoke = function(player: Player)
 	return
 end
 
-FireUpgradeChoice.OnServerEvent:Connect(function(player: Player, choosenData)
-	if not player or not choosenData then
+FireUpgradeChoice.OnServerEvent:Connect(function(player: Player, choosenUpgradeData)
+	if not player or not choosenUpgradeData then
 		return nil
 	end
 	local _playerState = player:FindFirstChild("PlayerState")
@@ -144,17 +144,17 @@ FireUpgradeChoice.OnServerEvent:Connect(function(player: Player, choosenData)
 	for i = 1, 3 do
 		table.insert(upgradeIds, upgradeOptions[i].Id)
 	end
-	if table.find(upgradeIds, choosenData.UpgradeId) == nil then
-		print("Upgrade: " .. choosenData.UpgradeId .. " never existed...")
-		choosenData.UpgradeId = upgradeOptions[choosenData.ButtonIndex].Id
+	if table.find(upgradeIds, choosenUpgradeData.UpgradeId) == nil then
+		print("Upgrade: " .. choosenUpgradeData.UpgradeId .. " never existed...")
+		choosenUpgradeData.UpgradeId = upgradeOptions[choosenUpgradeData.ButtonIndex].Id
 	end
-	print(dice, choosenData)
-	if dice.Dice[choosenData.DiceId].Upgrade.Id == choosenData.UpgradeId then
-		dice.Dice[choosenData.DiceId].Upgrade.Level += 1
+	print(dice, choosenUpgradeData)
+	if dice.Dice[choosenUpgradeData.DiceId].Upgrade.Id == choosenUpgradeData.UpgradeId then
+		dice.Dice[choosenUpgradeData.DiceId].Upgrade.Level += 1
 	else
-		dice.Dice[choosenData.DiceId].Upgrade.Id = choosenData.UpgradeId
-		print(dice.Dice[choosenData.DiceId].Upgrade.Id)
-		dice.Dice[choosenData.DiceId].Upgrade.Level = 1
+		dice.Dice[choosenUpgradeData.DiceId].Upgrade.Id = choosenUpgradeData.UpgradeId
+		print(dice.Dice[choosenUpgradeData.DiceId].Upgrade.Id)
+		dice.Dice[choosenUpgradeData.DiceId].Upgrade.Level = 1
 	end
 	print(dice)
 	_playerState.Value = "Battling"

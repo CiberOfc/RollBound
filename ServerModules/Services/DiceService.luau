@@ -1,6 +1,6 @@
 local DiceService = {}
 
-local DICE_AMMOUT = 5
+local DICE_AMMOUT = 1
 local DICE_SIDES = 6
 local BASE_REROLLS = 20
 
@@ -21,6 +21,7 @@ local function RollDice(upgrades)
 					Level = upgrades[i].Level or nil,
 				},
 				RerollCount = 0,
+				Unlocked = true,
 			}
 		end
 		return dice
@@ -35,6 +36,7 @@ local function RollDice(upgrades)
 				Level = nil,
 			},
 			RerollCount = 0,
+			Unlocked = false,
 		}
 	end
 	return dice
@@ -52,10 +54,11 @@ function DiceService.StartTurn(player: Player)
 	local previousDice = DiceService.GetPlayerState(player)
 	if previousDice then
 		playerUpgrades = {}
+		playerUpgrades[player] = playerUpgrades
 		for i = 1, DICE_AMMOUT do
-			table.insert(playerUpgrades, previousDice.Dice[i].Upgrade)
+			table.insert(playerUpgrades[player], previousDice.Dice[i].Upgrade)
 		end
-		print(previousDice, playerUpgrades)
+		print(previousDice, playerUpgrades[player])
 	end
 	local state = {
 		Dice = RollDice(playerUpgrades),
@@ -63,6 +66,7 @@ function DiceService.StartTurn(player: Player)
 		Confirmed = false,
 	}
 	PlayerStates[player] = state
+	state.Dice[1].Unlocked = true
 end
 
 function DiceService.GetPlayerState(player: Player)
@@ -92,11 +96,13 @@ function DiceService.RerollDice(player: Player, DiceId: number)
 	if not die then
 		return nil
 	end
-
-	die.Value = math.random(1, DICE_SIDES)
-	die.RerollCount += 1
-	state.RerollsLeft -= 1
-	return state
+	if die.Unlocked == true then
+		die.Value = math.random(1, DICE_SIDES)
+		die.RerollCount += 1
+		state.RerollsLeft -= 1
+		return state
+	end
+	return nil
 end
 
 function DiceService.ConfirmDice(player: Player)
