@@ -5,12 +5,12 @@ local DICE_SIDES = 6
 local BASE_REROLLS = 20
 
 local PlayerStates = {}
-local playerUpgrades = nil
+local playerUpgrades = {}
 
 local function RollDice(upgrades)
 	local dice = {}
 
-	if upgrades ~= nil then
+	if #upgrades ~= 0 then
 		print(upgrades)
 		for i = 1, DICE_AMMOUT do
 			dice[i] = {
@@ -18,7 +18,7 @@ local function RollDice(upgrades)
 				Value = math.random(1, DICE_SIDES),
 				Upgrade = {
 					Id = upgrades[i].Id or nil,
-					Level = upgrades[i].Level or nil,
+					Level = upgrades[i].Level or 0,
 				},
 				RerollCount = 0,
 				Unlocked = true,
@@ -32,8 +32,8 @@ local function RollDice(upgrades)
 			Id = i,
 			Value = math.random(1, DICE_SIDES),
 			Upgrade = {
-				UpgradeId = nil,
-				Level = nil,
+				Id = nil,
+				Level = 0,
 			},
 			RerollCount = 0,
 			Unlocked = false,

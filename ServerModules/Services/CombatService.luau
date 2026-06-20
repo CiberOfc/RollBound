@@ -19,7 +19,7 @@ function CombatService.ResolveTurn(player: Player)
 		return nil
 	end
 
-	local baseDamage = 5
+	local baseDamage = 10
 
 	local state = DiceService.GetPlayerState(player)
 	if not state then

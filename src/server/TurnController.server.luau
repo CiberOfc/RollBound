@@ -136,27 +136,10 @@ FireUpgradeChoice.OnServerEvent:Connect(function(player: Player, choosenUpgradeD
 	if _playerState.Value ~= "Upgrading" then
 		return
 	end
-	local upgradeIds = {}
-	local dice = DiceService.GetPlayerState(player)
-	print(dice)
-	local upgradeOptions = UpgradeService.GetLastGeneratedUpgrades(player)
 
-	for i = 1, 3 do
-		table.insert(upgradeIds, upgradeOptions[i].Id)
-	end
-	if table.find(upgradeIds, choosenUpgradeData.UpgradeId) == nil then
-		print("Upgrade: " .. choosenUpgradeData.UpgradeId .. " never existed...")
-		choosenUpgradeData.UpgradeId = upgradeOptions[choosenUpgradeData.ButtonIndex].Id
-	end
-	print(dice, choosenUpgradeData)
-	if dice.Dice[choosenUpgradeData.DiceId].Upgrade.Id == choosenUpgradeData.UpgradeId then
-		dice.Dice[choosenUpgradeData.DiceId].Upgrade.Level += 1
-	else
-		dice.Dice[choosenUpgradeData.DiceId].Upgrade.Id = choosenUpgradeData.UpgradeId
-		print(dice.Dice[choosenUpgradeData.DiceId].Upgrade.Id)
-		dice.Dice[choosenUpgradeData.DiceId].Upgrade.Level = 1
-	end
-	print(dice)
+	local finalUpgrades = UpgradeService.ApplyUpgrades(player, choosenUpgradeData)
+	print(finalUpgrades)
+
 	_playerState.Value = "Battling"
 	return
 end)

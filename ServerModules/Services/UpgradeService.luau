@@ -35,14 +35,44 @@ local function CanApplyUpgrade(player: Player, upgradeId, diceId)
 	local dice = DiceService.GetPlayerState(player)
 
 	if not dice then
-		return false, "DicesDosentExist"
+		return false, "Dices Dosent Exist"
 	end
+
+	if not dice.Dice[diceId] then
+		return false, "Dice Dosent Exist"
+	end
+
 	if dice.Dice[diceId].Unlocked ~= true then
-		return false, "DiceIsntUnlocked"
+		return false, "Dice Isnt Unlocked"
 	end
-	if dice.Dice[diceId].Upgrade.Id ~= upgradeId then
-		return false, "DiceAlreadyHasaDifferentUpgrade"
+
+	local upgradeChoices = UpgradeService.GetLastGeneratedUpgrades(player)
+
+	if not upgradeChoices then
+		return false, "No Generated Upgrades"
 	end
+
+	if table.find(upgradeChoices, upgradeId) == nil then
+		return false, "Upgrade Dosent Exist"
+	end
+
+	if dice.Dice[diceId].Upgrade.Id ~= nil and dice.Dice[diceId].Upgrade.Id ~= upgradeId then
+		return false, "Dice Already Has a Different Upgrade"
+	end
+
+	--  Places upgradesInside a table without categories
+	local upgradeLookup = {}
+
+	for _, category in pairs(UpgradeData) do
+		for UpgradeId, data in pairs(category) do
+			upgradeLookup[UpgradeId] = data
+		end
+	end
+
+	if dice.Dice[diceId].Upgrade.Level >= upgradeLookup[upgradeId].MaxLevel then
+		return false, "Upgrade Is already max level"
+	end
+
 	return true
 end
 
@@ -50,33 +80,18 @@ function UpgradeService.ApplyUpgrades(player: Player, choosenUpgradeData)
 	if not player then
 		return nil
 	end
+
 	if not choosenUpgradeData then
 		return nil
 	end
-	local upgradeOptions = UpgradeService.GetLastGeneratedUpgrades(player)
-	if upgradeOptions == nil then
-		return nil
-	end
 
-	local upgradeIds = {}
 	local diceUpgrades = {}
-
 	local dices = DiceService.GetPlayerState(player)
-
 	local CanUpgrade, error = CanApplyUpgrade(player, choosenUpgradeData.UpgradeId, choosenUpgradeData.DiceId)
 
 	if CanUpgrade == false then
 		print(error)
 		return nil
-	end
-
-	for i = 1, 3 do
-		table.insert(upgradeIds, upgradeOptions[i].Id)
-	end
-
-	if table.find(upgradeIds, choosenUpgradeData.UpgradeId) == nil then
-		print("Upgrade: " .. choosenUpgradeData.UpgradeId .. " never existed...")
-		choosenUpgradeData.UpgradeId = upgradeOptions[choosenUpgradeData.ButtonIndex].Id
 	end
 
 	if dices.Dice[choosenUpgradeData.DiceId].Upgrade.Id == choosenUpgradeData.UpgradeId then
@@ -87,11 +102,12 @@ function UpgradeService.ApplyUpgrades(player: Player, choosenUpgradeData)
 		dices.Dice[choosenUpgradeData.DiceId].Upgrade.Level = 1
 	end
 
-	for _, dice in pairs(dices) do
-		table.insert(diceUpgrades, { DiceId = dice.Id, Upgrade = dice.Upgrade })
+	for _, die in ipairs(dices.Dice) do
+		print(die)
+		table.insert(diceUpgrades, { DiceId = die.Id, Upgrade = die.Upgrade })
 	end
 
-	return
+	return diceUpgrades
 end
 
 function UpgradeService.GenerateUpgrades(player: Player)
