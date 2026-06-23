@@ -46,7 +46,7 @@ function CombatService.ResolveTurn(player: Player)
 		WeaponDamage = baseDamage,
 	}
 
-	local modifiers = UpgradeService.GetDamageModifiers({ context.Dice }) or {}
+	local modifiers = UpgradeService.GetDamageModifiers(context) or {}
 	local totalDamage = baseDamage + totalDice
 
 	for _, modifier in ipairs(modifiers) do

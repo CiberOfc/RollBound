@@ -154,7 +154,7 @@ function UpgradeService.GenerateUpgrades(player: Player)
 		if canApear then
 			table.insert(ChoosenUpgrades, upgrade)
 			local upgradeIds = {}
-			for i, value in ChoosenUpgrades do
+			for _, value in ChoosenUpgrades do
 				table.insert(upgradeIds, value.Id)
 			end
 			lastUpgradesGenerated[player] = upgradeIds
@@ -164,21 +164,180 @@ function UpgradeService.GenerateUpgrades(player: Player)
 	return ChoosenUpgrades
 end
 
+local DamageModifierHandler = {
+
+	--[[
+
+Templates:
+
+Context = {
+	Player = player,
+	Dice = diceState.Dice,
+	DiceTotal = 21,
+	WeaponDamage = 4,
+	ComboName = "Pair",
+	ComboMultiplier = 1.5,
+}
+
+UpgradeData = {
+	Name = "Blessed Die",
+	MaxLevel = 3,
+
+	Values = {
+		[1] = 1.25,
+		[2] = 1.5,
+		[3] = 1.75,
+	}
+}
+
+Die = {
+	Id = 2,
+	Value = 5,
+	RerollCount = 0,
+	Unlocked = true,
+
+	Upgrade = {
+		Id = "BlessedDie",
+		Level = 2,
+	}
+}
+]]
+
+	BlessedDie = function(die, upgradeData, _Context)
+		if die.RerollCount > 0 then
+			return nil
+		end
+		local level = die.Upgrade.Level
+		local value = upgradeData.Values[level]
+
+		if not value then
+			return nil
+		end
+
+		return {
+			Stat = "TotalDamage",
+			Type = "Multiplier",
+			Value = value,
+			Source = "BlessedDie",
+			DieId = die.Id,
+		}
+	end,
+
+	CelestialEcho = function(die, upgradeData, _Context)
+		local level = die.Upgrade.Level
+		local value = upgradeData.Values[level]
+
+		if not value then
+			return nil
+		end
+
+		return {
+			Stat = "TotalDamage",
+			Type = "Multiplier",
+			Value = value,
+			Source = "ToxicPop",
+			DieId = die.Id,
+		}
+	end,
+
+	AngelShield = function(die, upgradeData, _Context)
+		local level = die.Upgrade.Level
+		local value = upgradeData.Values[level]
+
+		if not value then
+			return nil
+		end
+
+		return {
+			Stat = "TotalDamage",
+			Type = "Multiplier",
+			Value = value,
+			Source = "ToxicPop",
+			DieId = die.Id,
+		}
+	end,
+
+	ToxicPop = function(die, upgradeData, _Context)
+		local level = die.Upgrade.Level
+		local stacks = upgradeData.Values[level]
+
+		if not stacks then
+			return nil
+		end
+
+		return {
+			Stat = "TotalDamage",
+			Type = "Multiplier",
+			Value = stacks,
+			Source = "ToxicPop",
+			DieId = die.Id,
+		}
+	end,
+
+	LingeringPoison = function(die, upgradeData, _Context)
+		local level = die.Upgrade.Level
+		local stacks = upgradeData.Values[level]
+
+		if not stacks then
+			return nil
+		end
+
+		return {
+			Stat = "TotalDamage",
+			Type = "Multiplier",
+			Value = stacks,
+			Source = "ToxicPop",
+			DieId = die.Id,
+		}
+	end,
+
+	BloodBlade = function(die, upgradeData, _Context)
+		local level = die.Upgrade.Level
+		local value = upgradeData.Values[level]
+
+		if not value then
+			return nil
+		end
+
+		return {
+			Stat = "TotalDamage",
+			Type = "Multiplier",
+			Value = value,
+			Source = "ToxicPop",
+			DieId = die.Id,
+		}
+	end,
+
+	SelfSacrifice = function(die, upgradeData, _Context)
+		local level = die.Upgrade.Level
+		local value = upgradeData.Values[level]
+
+		if not value then
+			return nil
+		end
+		return {
+			Stat = "TotalDamage",
+			Type = "Multiplier",
+			Value = value,
+			Source = "ToxicPop",
+			DieId = die.Id,
+		}
+	end,
+}
+
 function UpgradeService.GetDamageModifiers(context)
-	if not context then
-		return nil
+	local modifiers = {}
+
+	if not context or not context.Dice then
+		return modifiers
 	end
 
-	local modifiers = {}
-	local die = context[1][1]
+	for _, die in ipairs(context.Dice) do
+		local ownedUpgrade = die.Upgrade
 
-	if die and die.RerollCount == -1 then
-		table.insert(modifiers, {
-			Stat = "BaseDamage",
-			Type = "DmgMultiplier",
-			Value = 1.5,
-			Source = "BlessedDie",
-		})
+		if not ownedUpgrade or not ownedUpgrade.Id then
+			continue
+		end
 	end
 	return modifiers
 end
