@@ -5,6 +5,17 @@ local UpgradeService = {}
 
 local lastUpgradesGenerated = {}
 
+local function UpgradeLookUp(UpgradeName)
+	if not UpgradeName then
+		return nil
+	end
+	for categoryName, Category in UpgradeData do
+		print(Category[UpgradeName])
+	end
+end
+
+UpgradeLookUp("BlessedDie")
+
 function UpgradeService.GetLastGeneratedUpgrades(player: Player)
 	print(lastUpgradesGenerated)
 	return lastUpgradesGenerated[player]
@@ -20,7 +31,7 @@ function UpgradeService.GetAllPlayerUpgrades(player: Player)
 		return nil
 	end
 	local upgrades = {}
-	for _, dice in ipairs(Dice) do
+	for _, dice in ipairs(Dice.Dice) do
 		table.insert(upgrades, dice.Upgrade)
 	end
 
@@ -222,7 +233,7 @@ Die = {
 			DieId = die.Id,
 		}
 	end,
-
+	--[[
 	CelestialEcho = function(die, upgradeData, _Context)
 		local level = die.Upgrade.Level
 		local value = upgradeData.Values[level]
@@ -235,7 +246,7 @@ Die = {
 			Stat = "TotalDamage",
 			Type = "Multiplier",
 			Value = value,
-			Source = "ToxicPop",
+			Source = "CelestialEcho",
 			DieId = die.Id,
 		}
 	end,
@@ -252,7 +263,7 @@ Die = {
 			Stat = "TotalDamage",
 			Type = "Multiplier",
 			Value = value,
-			Source = "ToxicPop",
+			Source = "AngelShield",
 			DieId = die.Id,
 		}
 	end,
@@ -286,7 +297,7 @@ Die = {
 			Stat = "TotalDamage",
 			Type = "Multiplier",
 			Value = stacks,
-			Source = "ToxicPop",
+			Source = "LingeringPoison",
 			DieId = die.Id,
 		}
 	end,
@@ -303,7 +314,7 @@ Die = {
 			Stat = "TotalDamage",
 			Type = "Multiplier",
 			Value = value,
-			Source = "ToxicPop",
+			Source = "BloodBlade",
 			DieId = die.Id,
 		}
 	end,
@@ -319,13 +330,14 @@ Die = {
 			Stat = "TotalDamage",
 			Type = "Multiplier",
 			Value = value,
-			Source = "ToxicPop",
+			Source = "SelfSacrifice",
 			DieId = die.Id,
 		}
 	end,
+	]]
 }
 
-function UpgradeService.GetDamageModifiers(context)
+function UpgradeService.GetEffects(context)
 	local modifiers = {}
 
 	if not context or not context.Dice then
